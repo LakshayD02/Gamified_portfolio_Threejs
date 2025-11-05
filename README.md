@@ -6,10 +6,6 @@
 
 An immersive 3D interactive portfolio experience where visitors explore a virtual landscape to discover professional information through an engaging game-like interface.
 
-## 🎮 Live Demo
-
-[View Live Project](https://yourusername.github.io/portfolio-explorer)
-
 ## ✨ Features
 
 ### 🚗 Interactive 3D Environment
