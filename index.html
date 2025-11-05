@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lakshay | Portfolio Explorer</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="canvasContainer"></div>
+        
+        <div class="start-screen" id="startScreen">
+            <h1 class="start-title">LAKSHAY DHOUNDIYAL | PORTFOLIO</h1>
+            <p class="start-subtitle">Explore the landscape to discover hidden energy nodes and unlock sections of my professional portfolio.</p>
+            
+            <div class="rules-container">
+                <h3 class="rules-title">Game Rules</h3>
+                <ul class="rules-list">
+                    <li>Drive around the landscape to find <strong>35 hidden energy nodes</strong></li>
+                    <li>Collect <strong>30 nodes</strong> to complete the game and unlock all portfolio sections</li>
+                    <li>Use your radar to locate nearby nodes</li>
+                    <li>Avoid obstacles - collisions will cost you one collected node</li>
+                    <li>Unlock portfolio sections as you collect nodes:
+                        <ul>
+                            <li><strong>5 nodes:</strong> About Me</li>
+                            <li><strong>10 nodes:</strong> Skills & Expertise</li>
+                            <li><strong>15 nodes:</strong> Professional Experience</li>
+                            <li><strong>20 nodes:</strong> Projects & Contributions</li>
+                            <li><strong>25 nodes:</strong> Contact Information</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            
+            <button class="start-button" id="startButton">BEGIN EXPLORATION</button>
+        </div>
+        
+        <div id="uiContainer">
+            <div id="hud">
+                <div class="hud-section">
+                    <div class="hud-title">Nodes Found</div>
+                    <div id="orbsCount">0/30</div>
+                </div>
+                <div class="hud-section">
+                    <div class="hud-title">Speed</div>
+                    <div id="speedDisplay">0 km/h</div>
+                </div>
+                <div class="hud-section">
+                    <div class="hud-title">Exploration Progress</div>
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="hud-section">
+                    <div class="hud-title">Next Unlock</div>
+                    <div id="nextUnlock">About Me (5 nodes)</div>
+                </div>
+                <div class="hud-section">
+                    <div class="hud-title">Radar Range</div>
+                    <div id="radarRange">50m</div>
+                </div>
+            </div>
+            
+            <div id="instructions">
+                <strong>CONTROLS</strong><br>
+                ↑ - Accelerate<br>
+                ↓ - Brake/Reverse<br>
+                ← → - Steer<br>
+                Space - Handbrake<br>
+                R - Reset Car Position
+            </div>
+            
+            <div class="time-display" id="timeDisplay">
+                <div class="hud-title">Time</div>
+                <div id="timer">00:00</div>
+            </div>
+            
+            <div class="radar">
+                <div class="radar-sweep"></div>
+                <div id="radarDots"></div>
+            </div>
+            
+            <div class="notification" id="notification">
+                <div class="notification-title" id="notificationTitle">Node Discovered!</div>
+                <div id="notificationText">You found a hidden energy node</div>
+            </div>
+            
+            <!-- Mobile Controls -->
+            <div id="mobileControls">
+                <div class="mobile-control-row">
+                    <div class="mobile-control-btn" id="mobileUp">
+                        <i class="fas fa-arrow-up"></i>
+                    </div>
+                </div>
+                <div class="mobile-control-row">
+                    <div class="mobile-control-btn" id="mobileLeft">
+                        <i class="fas fa-arrow-left"></i>
+                    </div>
+                    <div class="mobile-control-btn" id="mobileDown">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                    <div class="mobile-control-btn" id="mobileRight">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+                <div class="mobile-control-row">
+                    <div class="mobile-control-btn" id="mobileSpace">
+                        <i class="fas fa-hand-paper"></i>
+                    </div>
+                    <div class="mobile-control-btn" id="mobileReset">
+                        <i class="fas fa-redo"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Enhanced Portfolio Holograms -->
+        <div class="portfolio-hologram" id="aboutHologram">
+            <div class="hologram-header">
+                <div class="hologram-title">About Me</div>
+                <button class="close-btn" onclick="closeHologram('aboutHologram')">×</button>
+            </div>
+            <div class="hologram-content">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="profile-info">
+                        <h2>Lakshay</h2>
+                        <p>Full-Stack Developer & Cybersecurity Researcher</p>
+                    </div>
+                </div>
+                
+                <h3 class="section-heading">Professional Summary</h3>
+                <p style="margin-bottom: 20px; line-height: 1.6;">A passionate Full-Stack Developer and Cybersecurity Researcher with extensive experience in building scalable web applications and implementing robust security measures. Skilled in modern web technologies and cybersecurity practices with a strong foundation in both frontend and backend development. Committed to creating secure, efficient, and user-friendly digital solutions.</p>
+                
+                <h3 class="section-heading">Education</h3>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-date">2024 - Present</div>
+                        <h4>M.Sc. in Informatics (IT)</h4>
+                        <p>Institute of Informatics and Communication, University of Delhi</p>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">2021 - 2024</div>
+                        <h4>B.Sc. (Hons.) Electronics</h4>
+                        <p>Atma Ram Sanatan Dharma College, Delhi University</p>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">2024 - Present</div>
+                        <h4>Advanced Certificate in Information Security (ACISE)</h4>
+                        <p>Indira Gandhi National Open University (IGNOU)</p>
+                    </div>
+                </div>
+                
+                <h3 class="section-heading">Certifications</h3>
+                <div class="skill-list">
+                    <span class="skill-tag">AWS Certified Cloud Practitioner</span>
+                    <span class="skill-tag">Google Cybersecurity Professional Certificate</span>
+                    <span class="skill-tag">Microsoft Azure Fundamentals</span>
+                    <span class="skill-tag">Certified Ethical Hacker (CEH) - In Progress</span>
+                </div>
+                
+                <button class="download-btn">
+                    <i class="fas fa-download"></i> Download Resume
+                </button>
+            </div>
+        </div>
+        
+        <div class="portfolio-hologram" id="skillsHologram">
+            <div class="hologram-header">
+                <div class="hologram-title">Technical Skills</div>
+                <button class="close-btn" onclick="closeHologram('skillsHologram')">×</button>
+            </div>
+            <div class="hologram-content">
+                <p style="margin-bottom: 20px; line-height: 1.6;">Comprehensive expertise across modern web development technologies and cybersecurity practices, with a focus on creating secure, scalable applications that deliver exceptional user experiences.</p>
+                
+                <div class="skill-category">
+                    <h3 class="section-heading">Frontend Development</h3>
+                    <div class="skill-list">
+                        <span class="skill-tag">HTML5</span>
+                        <span class="skill-tag">CSS3</span>
+                        <span class="skill-tag">JavaScript (ES6+)</span>
+                        <span class="skill-tag">TypeScript</span>
+                        <span class="skill-tag">React</span>
+                        <span class="skill-tag">Next.js</span>
+                        <span class="skill-tag">Angular</span>
+                        <span class="skill-tag">Tailwind CSS</span>
+                        <span class="skill-tag">Bootstrap</span>
+                        <span class="skill-tag">SASS/SCSS</span>
+                        <span class="skill-tag">Redux</span>
+                        <span class="skill-tag">Vue.js</span>
+                    </div>
+                </div>
+                
+                <div class="skill-category">
+                    <h3 class="section-heading">Backend & DevOps</h3>
+                    <div class="skill-list">
+                        <span class="skill-tag">Node.js</span>
+                        <span class="skill-tag">Express</span>
+                        <span class="skill-tag">Django</span>
+                        <span class="skill-tag">CodeIgniter</span>
+                        <span class="skill-tag">MySQL</span>
+                        <span class="skill-tag">PostgreSQL</span>
+                        <span class="skill-tag">MongoDB</span>
+                        <span class="skill-tag">Firebase</span>
+                        <span class="skill-tag">AWS</span>
+                        <span class="skill-tag">Azure</span>
+                        <span class="skill-tag">Docker</span>
+                        <span class="skill-tag">Kubernetes</span>
+                        <span class="skill-tag">CI/CD Pipelines</span>
+                        <span class="skill-tag">RESTful APIs</span>
+                        <span class="skill-tag">GraphQL</span>
+                    </div>
+                </div>
+                
+                <div class="skill-category">
+                    <h3 class="section-heading">Cybersecurity</h3>
+                    <div class="skill-list">
+                        <span class="skill-tag">OSINT Investigations</span>
+                        <span class="skill-tag">Vulnerability Assessments</span>
+                        <span class="skill-tag">Penetration Testing</span>
+                        <span class="skill-tag">Dark Web Monitoring</span>
+                        <span class="skill-tag">Security Auditing</span>
+                        <span class="skill-tag">Network Security</span>
+                        <span class="skill-tag">Cryptography</span>
+                        <span class="skill-tag">Incident Response</span>
+                    </div>
+                </div>
+                
+                <div class="skill-category">
+                    <h3 class="section-heading">Tools & Platforms</h3>
+                    <div class="skill-list">
+                        <span class="skill-tag">Git & GitHub</span>
+                        <span class="skill-tag">Jenkins</span>
+                        <span class="skill-tag">Jira</span>
+                        <span class="skill-tag">Figma</span>
+                        <span class="skill-tag">Postman</span>
+                        <span class="skill-tag">Wireshark</span>
+                        <span class="skill-tag">Metasploit</span>
+                        <span class="skill-tag">Burp Suite</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="portfolio-hologram" id="experienceHologram">
+            <div class="hologram-header">
+                <div class="hologram-title">Professional Experience</div>
+                <button class="close-btn" onclick="closeHologram('experienceHologram')">×</button>
+            </div>
+            <div class="hologram-content">
+                <div class="experience-item">
+                    <h4>Cybersecurity & VAPT Intern</h4>
+                    <p style="color: #bbdefb; margin: 5px 0;">Indian Cyber Crime Coordination Centre (I4C), Ministry of Home Affairs</p>
+                    <p class="timeline-date">May 2025 – July 2025</p>
+                    <p>Conducted OSINT investigations, dark web monitoring, credential exposure analysis, and vulnerability assessments to identify and mitigate security threats. Assisted in developing security protocols and contributed to threat intelligence reports.</p>
+                    <div class="skill-list" style="margin-top: 10px;">
+                        <span class="skill-tag">OSINT</span>
+                        <span class="skill-tag">Vulnerability Assessment</span>
+                        <span class="skill-tag">Threat Intelligence</span>
+                    </div>
+                </div>
+                
+                <div class="experience-item">
+                    <h4>Penetration Tester</h4>
+                    <p style="color: #bbdefb; margin: 5px 0;">HackersDaddy Cybersecurity Solutions</p>
+                    <p class="timeline-date">Dec 2024 – Mar 2025</p>
+                    <p>Identified and exploited vulnerabilities including XSS, IDOR, file upload flaws, and access control weaknesses in client applications and systems. Documented findings and provided remediation recommendations.</p>
+                    <div class="skill-list" style="margin-top: 10px;">
+                        <span class="skill-tag">Penetration Testing</span>
+                        <span class="skill-tag">Web Application Security</span>
+                        <span class="skill-tag">Vulnerability Assessment</span>
+                    </div>
+                </div>
+                
+                <div class="experience-item">
+                    <h4>Full Stack Web Developer</h4>
+                    <p style="color: #bbdefb; margin: 5px 0;">Coding Bits</p>
+                    <p class="timeline-date">Nov 2024 – Feb 2025</p>
+                    <p>Developed and maintained web applications using MERN stack, integrated Stripe payment systems, and deployed solutions on Firebase and AWS. Collaborated with cross-functional teams to deliver high-quality software solutions.</p>
+                    <div class="skill-list" style="margin-top: 10px;">
+                        <span class="skill-tag">MERN Stack</span>
+                        <span class="skill-tag">Payment Integration</span>
+                        <span class="skill-tag">Cloud Deployment</span>
+                    </div>
+                </div>
+                
+                <div class="experience-item">
+                    <h4>Software Development Engineer Intern</h4>
+                    <p style="color: #bbdefb; margin: 5px 0;">Bluestock Fintech</p>
+                    <p class="timeline-date">Jun 2024 – Sep 2024</p>
+                    <p>Contributed to fintech application development with focus on security and performance optimization. Implemented new features and resolved bugs in existing codebase.</p>
+                    <div class="skill-list" style="margin-top: 10px;">
+                        <span class="skill-tag">Fintech</span>
+                        <span class="skill-tag">Performance Optimization</span>
+                        <span class="skill-tag">Software Development</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="portfolio-hologram" id="projectsHologram">
+            <div class="hologram-header">
+                <div class="hologram-title">Projects & Contributions</div>
+                <button class="close-btn" onclick="closeHologram('projectsHologram')">×</button>
+            </div>
+            <div class="hologram-content">
+                <div class="project-item">
+                    <h4>CarbonWise: Carbon Footprint Tracker <span class="badge">Full Stack</span></h4>
+                    <p class="timeline-date">July 2025</p>
+                    <p>A comprehensive web application for tracking and analyzing users' carbon footprint with data visualization and actionable insights. Features include personalized recommendations, goal setting, and social sharing capabilities.</p>
+                    <div class="project-links">
+                        <a href="#" class="project-link">
+                            <i class="fab fa-github"></i> View Code
+                        </a>
+                        <a href="#" class="project-link">
+                            <i class="fas fa-external-link-alt"></i> Live Demo
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="project-item">
+                    <h4>Full Stack Uber Clone <span class="badge">MERN Stack</span></h4>
+                    <p class="timeline-date">January 2025</p>
+                    <p>A complete ride-hailing application emulating Uber's core features including real-time tracking, payment integration, and user management. Implemented with React Native for mobile and React for web dashboard.</p>
+                    <div class="project-links">
+                        <a href="#" class="project-link">
+                            <i class="fab fa-github"></i> View Code
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="project-item">
+                    <h4>CipherGPT – AI Chatbot <span class="badge">SaaS</span></h4>
+                    <p class="timeline-date">July 2024</p>
+                    <p>A full-stack SaaS chatbot leveraging OpenAI API with user authentication, conversation history, and subscription management. Features include multiple AI models, file uploads, and team collaboration.</p>
+                    <div class="project-links">
+                        <a href="#" class="project-link">
+                            <i class="fab fa-github"></i> View Code
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="project-item">
+                    <h4>Job Portal Platform <span class="badge">Full Stack</span></h4>
+                    <p>A comprehensive job search and application platform with advanced filtering, resume parsing, and application tracking. Includes employer dashboard, candidate matching algorithm, and interview scheduling.</p>
+                    <div class="project-links">
+                        <a href="#" class="project-link">
+                            <i class="fab fa-github"></i> View Code
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="project-item">
+                    <h4>E-learning Platform <span class="badge">Full Stack</span></h4>
+                    <p>An interactive platform for online courses with video streaming, progress tracking, and assessment features. Includes instructor dashboard, certificate generation, and discussion forums.</p>
+                    <div class="project-links">
+                        <a href="#" class="project-link">
+                            <i class="fab fa-github"></i> View Code
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="project-item">
+                    <h4>Vulnerability Scanner Tool <span class="badge">Cybersecurity</span></h4>
+                    <p>A custom vulnerability scanner for web applications that identifies common security flaws like XSS, SQL injection, and CSRF vulnerabilities. Features detailed reporting and remediation guidance.</p>
+                    <div class="project-links">
+                        <a href="#" class="project-link">
+                            <i class="fab fa-github"></i> View Code
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="portfolio-hologram" id="contactHologram">
+            <div class="hologram-header">
+                <div class="hologram-title">Contact</div>
+                <button class="close-btn" onclick="closeHologram('contactHologram')">×</button>
+            </div>
+            <div class="hologram-content">
+                <h3 class="section-heading">Let's Create Something Amazing Together</h3>
+                <p style="margin-bottom: 30px;">I'm always open to discussing new opportunities, interesting projects, or potential collaborations. Feel free to reach out through any of the channels below.</p>
+                
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <h4>Website</h4>
+                        <p>lakshay.dev</p>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <h4>Email</h4>
+                        <p>lakshay@example.com</p>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fab fa-linkedin"></i>
+                        </div>
+                        <h4>LinkedIn</h4>
+                        <p>linkedin.com/in/lakshay</p>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fab fa-github"></i>
+                        </div>
+                        <h4>GitHub</h4>
+                        <p>github.com/lakshay</p>
+                    </div>
+                </div>
+                
+                <h3 class="section-heading" style="margin-top: 30px;">Professional Services</h3>
+                <div class="skill-list">
+                    <span class="skill-tag">Web Application Development</span>
+                    <span class="skill-tag">Cybersecurity Consulting</span>
+                    <span class="skill-tag">Penetration Testing</span>
+                    <span class="skill-tag">Cloud Solutions</span>
+                    <span class="skill-tag">API Development</span>
+                    <span class="skill-tag">Technical Consulting</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="game-over-screen" id="gameOverScreen">
+            <h2 class="game-over-title">Exploration Complete!</h2>
+            <p style="font-size: 24px; margin-bottom: 30px;">You've discovered 30 hidden nodes!</p>
+            <p style="font-size: 18px; margin-bottom: 40px; max-width: 600px;">Thank you for exploring my portfolio. I hope you enjoyed the journey and learned more about my skills and experience.</p>
+            <div id="finalTime" style="font-size: 20px; margin-bottom: 30px; color: #64b5f6;"></div>
+            <button class="start-button" id="restartButton">Explore Again</button>
+        </div>
+        
+        <div id="loadingScreen">
+            <div class="loading-text">Initializing Exploration Environment</div>
+            <div class="loading-bar">
+                <div id="loadingProgress" class="loading-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
