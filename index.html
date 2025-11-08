@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lakshay | Portfolio Explorer</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Lakshay | Gamified Portfolio</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -12,17 +11,17 @@
         <div id="canvasContainer"></div>
         
         <div class="start-screen" id="startScreen">
-            <h1 class="start-title">LAKSHAY DHOUNDIYAL | PORTFOLIO</h1>
-            <p class="start-subtitle">Explore the landscape to discover hidden energy nodes and unlock sections of my professional portfolio.</p>
+            <h1 class="start-title">LAKSHAY | GAMIFIED PORTFOLIO</h1>
+            <p class="start-subtitle">Embark on an immersive journey to discover hidden energy nodes and unlock my professional portfolio in this interactive 3D experience.</p>
             
             <div class="rules-container">
-                <h3 class="rules-title">Game Rules</h3>
+                <h3 class="rules-title">Mission Objectives</h3>
                 <ul class="rules-list">
-                    <li>Drive around the landscape to find <strong>35 hidden energy nodes</strong></li>
-                    <li>Collect <strong>30 nodes</strong> to complete the game and unlock all portfolio sections</li>
-                    <li>Use your radar to locate nearby nodes</li>
+                    <li>Navigate the terrain to locate <strong>35 hidden energy nodes</strong></li>
+                    <li>Collect <strong>30 nodes</strong> to complete the mission and unlock all portfolio sections</li>
+                    <li>Utilize your radar system to detect nearby nodes</li>
                     <li>Avoid obstacles - collisions will cost you one collected node</li>
-                    <li>Unlock portfolio sections as you collect nodes:
+                    <li>Unlock portfolio sections as you progress:
                         <ul>
                             <li><strong>5 nodes:</strong> About Me</li>
                             <li><strong>10 nodes:</strong> Skills & Expertise</li>
@@ -31,55 +30,58 @@
                             <li><strong>25 nodes:</strong> Contact Information</li>
                         </ul>
                     </li>
+                    <li>Discover power-ups for temporary advantages</li>
                 </ul>
             </div>
             
-            <button class="start-button" id="startButton">BEGIN EXPLORATION</button>
+            <button class="start-button" id="startButton">INITIATE MISSION</button>
         </div>
         
         <div id="uiContainer">
             <div id="hud">
                 <div class="hud-section">
-                    <div class="hud-title">Nodes Found</div>
-                    <div id="orbsCount">0/30</div>
-                </div>
-                <div class="hud-section">
-                    <div class="hud-title">Speed</div>
-                    <div id="speedDisplay">0 km/h</div>
-                </div>
-                <div class="hud-section">
-                    <div class="hud-title">Exploration Progress</div>
+                    <div class="hud-title">Energy Nodes</div>
+                    <div id="orbsCount" class="hud-value">0/30</div>
                     <div class="progress-bar">
                         <div id="progressFill" class="progress-fill" style="width: 0%"></div>
                     </div>
                 </div>
                 <div class="hud-section">
-                    <div class="hud-title">Next Unlock</div>
-                    <div id="nextUnlock">About Me (5 nodes)</div>
+                    <div class="hud-title">Vehicle Speed</div>
+                    <div id="speedDisplay" class="hud-value">0 km/h</div>
                 </div>
                 <div class="hud-section">
-                    <div class="hud-title">Radar Range</div>
-                    <div id="radarRange">50m</div>
+                    <div class="hud-title">Mission Status</div>
+                    <div id="nextUnlock" class="hud-value">About Me (5 nodes)</div>
+                </div>
+                <div class="hud-section">
+                    <div class="hud-title">Power-ups</div>
+                    <div id="powerUpStatus" class="hud-value">None Active</div>
                 </div>
             </div>
             
             <div id="instructions">
-                <strong>CONTROLS</strong><br>
+                <strong>CONTROL SYSTEMS</strong><br>
                 ↑ - Accelerate<br>
                 ↓ - Brake/Reverse<br>
-                ← → - Steer<br>
+                ← → - Steering<br>
                 Space - Handbrake<br>
-                R - Reset Car Position
+                R - Reset Vehicle<br>
+                H - Toggle Holograms
             </div>
             
             <div class="time-display" id="timeDisplay">
-                <div class="hud-title">Time</div>
-                <div id="timer">00:00</div>
+                <div class="hud-title">Mission Time</div>
+                <div id="timer" class="hud-value">00:00</div>
             </div>
             
             <div class="radar">
                 <div class="radar-sweep"></div>
                 <div id="radarDots"></div>
+            </div>
+            
+            <div class="mini-map">
+                <canvas id="miniMapCanvas" class="mini-map-canvas"></canvas>
             </div>
             
             <div class="notification" id="notification">
@@ -116,7 +118,7 @@
             </div>
         </div>
         
-        <!-- Enhanced Portfolio Holograms -->
+        <!-- Professional Portfolio Holograms -->
         <div class="portfolio-hologram" id="aboutHologram">
             <div class="hologram-header">
                 <div class="hologram-title">About Me</div>
@@ -125,7 +127,7 @@
             <div class="hologram-content">
                 <div class="profile-header">
                     <div class="profile-avatar">
-                        <i class="fas fa-user"></i>
+                        <i class="fas fa-user-astronaut"></i>
                     </div>
                     <div class="profile-info">
                         <h2>Lakshay</h2>
@@ -134,24 +136,24 @@
                 </div>
                 
                 <h3 class="section-heading">Professional Summary</h3>
-                <p style="margin-bottom: 20px; line-height: 1.6;">A passionate Full-Stack Developer and Cybersecurity Researcher with extensive experience in building scalable web applications and implementing robust security measures. Skilled in modern web technologies and cybersecurity practices with a strong foundation in both frontend and backend development. Committed to creating secure, efficient, and user-friendly digital solutions.</p>
+                <p style="margin-bottom: 25px; line-height: 1.7; color: #d0d0e0;">A passionate Full-Stack Developer and Cybersecurity Researcher with extensive experience in building scalable web applications and implementing robust security measures. Skilled in modern web technologies and cybersecurity practices with a strong foundation in both frontend and backend development. Committed to creating secure, efficient, and user-friendly digital solutions.</p>
                 
                 <h3 class="section-heading">Education</h3>
                 <div class="timeline">
                     <div class="timeline-item">
                         <div class="timeline-date">2024 - Present</div>
-                        <h4>M.Sc. in Informatics (IT)</h4>
-                        <p>Institute of Informatics and Communication, University of Delhi</p>
+                        <h4 style="color: #ffffff;">M.Sc. in Informatics (IT)</h4>
+                        <p style="color: #b0d0ff;">Institute of Informatics and Communication, University of Delhi</p>
                     </div>
                     <div class="timeline-item">
                         <div class="timeline-date">2021 - 2024</div>
-                        <h4>B.Sc. (Hons.) Electronics</h4>
-                        <p>Atma Ram Sanatan Dharma College, Delhi University</p>
+                        <h4 style="color: #ffffff;">B.Sc. (Hons.) Electronics</h4>
+                        <p style="color: #b0d0ff;">Atma Ram Sanatan Dharma College, Delhi University</p>
                     </div>
                     <div class="timeline-item">
                         <div class="timeline-date">2024 - Present</div>
-                        <h4>Advanced Certificate in Information Security (ACISE)</h4>
-                        <p>Indira Gandhi National Open University (IGNOU)</p>
+                        <h4 style="color: #ffffff;">Advanced Certificate in Information Security (ACISE)</h4>
+                        <p style="color: #b0d0ff;">Indira Gandhi National Open University (IGNOU)</p>
                     </div>
                 </div>
                 
@@ -175,7 +177,7 @@
                 <button class="close-btn" onclick="closeHologram('skillsHologram')">×</button>
             </div>
             <div class="hologram-content">
-                <p style="margin-bottom: 20px; line-height: 1.6;">Comprehensive expertise across modern web development technologies and cybersecurity practices, with a focus on creating secure, scalable applications that deliver exceptional user experiences.</p>
+                <p style="margin-bottom: 25px; line-height: 1.7; color: #d0d0e0;">Comprehensive expertise across modern web development technologies and cybersecurity practices, with a focus on creating secure, scalable applications that deliver exceptional user experiences.</p>
                 
                 <div class="skill-category">
                     <h3 class="section-heading">Frontend Development</h3>
@@ -253,11 +255,11 @@
             </div>
             <div class="hologram-content">
                 <div class="experience-item">
-                    <h4>Cybersecurity & VAPT Intern</h4>
-                    <p style="color: #bbdefb; margin: 5px 0;">Indian Cyber Crime Coordination Centre (I4C), Ministry of Home Affairs</p>
+                    <h4 style="color: #ffffff;">Cybersecurity & VAPT Intern</h4>
+                    <p style="color: #b0d0ff; margin: 8px 0;">Indian Cyber Crime Coordination Centre (I4C), Ministry of Home Affairs</p>
                     <p class="timeline-date">May 2025 – July 2025</p>
-                    <p>Conducted OSINT investigations, dark web monitoring, credential exposure analysis, and vulnerability assessments to identify and mitigate security threats. Assisted in developing security protocols and contributed to threat intelligence reports.</p>
-                    <div class="skill-list" style="margin-top: 10px;">
+                    <p style="color: #d0d0e0;">Conducted OSINT investigations, dark web monitoring, credential exposure analysis, and vulnerability assessments to identify and mitigate security threats. Assisted in developing security protocols and contributed to threat intelligence reports.</p>
+                    <div class="skill-list" style="margin-top: 15px;">
                         <span class="skill-tag">OSINT</span>
                         <span class="skill-tag">Vulnerability Assessment</span>
                         <span class="skill-tag">Threat Intelligence</span>
@@ -265,11 +267,11 @@
                 </div>
                 
                 <div class="experience-item">
-                    <h4>Penetration Tester</h4>
-                    <p style="color: #bbdefb; margin: 5px 0;">HackersDaddy Cybersecurity Solutions</p>
+                    <h4 style="color: #ffffff;">Penetration Tester</h4>
+                    <p style="color: #b0d0ff; margin: 8px 0;">HackersDaddy Cybersecurity Solutions</p>
                     <p class="timeline-date">Dec 2024 – Mar 2025</p>
-                    <p>Identified and exploited vulnerabilities including XSS, IDOR, file upload flaws, and access control weaknesses in client applications and systems. Documented findings and provided remediation recommendations.</p>
-                    <div class="skill-list" style="margin-top: 10px;">
+                    <p style="color: #d0d0e0;">Identified and exploited vulnerabilities including XSS, IDOR, file upload flaws, and access control weaknesses in client applications and systems. Documented findings and provided remediation recommendations.</p>
+                    <div class="skill-list" style="margin-top: 15px;">
                         <span class="skill-tag">Penetration Testing</span>
                         <span class="skill-tag">Web Application Security</span>
                         <span class="skill-tag">Vulnerability Assessment</span>
@@ -277,11 +279,11 @@
                 </div>
                 
                 <div class="experience-item">
-                    <h4>Full Stack Web Developer</h4>
-                    <p style="color: #bbdefb; margin: 5px 0;">Coding Bits</p>
+                    <h4 style="color: #ffffff;">Full Stack Web Developer</h4>
+                    <p style="color: #b0d0ff; margin: 8px 0;">Coding Bits</p>
                     <p class="timeline-date">Nov 2024 – Feb 2025</p>
-                    <p>Developed and maintained web applications using MERN stack, integrated Stripe payment systems, and deployed solutions on Firebase and AWS. Collaborated with cross-functional teams to deliver high-quality software solutions.</p>
-                    <div class="skill-list" style="margin-top: 10px;">
+                    <p style="color: #d0d0e0;">Developed and maintained web applications using MERN stack, integrated Stripe payment systems, and deployed solutions on Firebase and AWS. Collaborated with cross-functional teams to deliver high-quality software solutions.</p>
+                    <div class="skill-list" style="margin-top: 15px;">
                         <span class="skill-tag">MERN Stack</span>
                         <span class="skill-tag">Payment Integration</span>
                         <span class="skill-tag">Cloud Deployment</span>
@@ -289,11 +291,11 @@
                 </div>
                 
                 <div class="experience-item">
-                    <h4>Software Development Engineer Intern</h4>
-                    <p style="color: #bbdefb; margin: 5px 0;">Bluestock Fintech</p>
+                    <h4 style="color: #ffffff;">Software Development Engineer Intern</h4>
+                    <p style="color: #b0d0ff; margin: 8px 0;">Bluestock Fintech</p>
                     <p class="timeline-date">Jun 2024 – Sep 2024</p>
-                    <p>Contributed to fintech application development with focus on security and performance optimization. Implemented new features and resolved bugs in existing codebase.</p>
-                    <div class="skill-list" style="margin-top: 10px;">
+                    <p style="color: #d0d0e0;">Contributed to fintech application development with focus on security and performance optimization. Implemented new features and resolved bugs in existing codebase.</p>
+                    <div class="skill-list" style="margin-top: 15px;">
                         <span class="skill-tag">Fintech</span>
                         <span class="skill-tag">Performance Optimization</span>
                         <span class="skill-tag">Software Development</span>
@@ -309,9 +311,9 @@
             </div>
             <div class="hologram-content">
                 <div class="project-item">
-                    <h4>CarbonWise: Carbon Footprint Tracker <span class="badge">Full Stack</span></h4>
+                    <h4 style="color: #ffffff;">CarbonWise: Carbon Footprint Tracker <span class="badge">Full Stack</span></h4>
                     <p class="timeline-date">July 2025</p>
-                    <p>A comprehensive web application for tracking and analyzing users' carbon footprint with data visualization and actionable insights. Features include personalized recommendations, goal setting, and social sharing capabilities.</p>
+                    <p style="color: #d0d0e0;">A comprehensive web application for tracking and analyzing users' carbon footprint with data visualization and actionable insights. Features include personalized recommendations, goal setting, and social sharing capabilities.</p>
                     <div class="project-links">
                         <a href="#" class="project-link">
                             <i class="fab fa-github"></i> View Code
@@ -323,9 +325,9 @@
                 </div>
                 
                 <div class="project-item">
-                    <h4>Full Stack Uber Clone <span class="badge">MERN Stack</span></h4>
+                    <h4 style="color: #ffffff;">Full Stack Uber Clone <span class="badge">MERN Stack</span></h4>
                     <p class="timeline-date">January 2025</p>
-                    <p>A complete ride-hailing application emulating Uber's core features including real-time tracking, payment integration, and user management. Implemented with React Native for mobile and React for web dashboard.</p>
+                    <p style="color: #d0d0e0;">A complete ride-hailing application emulating Uber's core features including real-time tracking, payment integration, and user management. Implemented with React Native for mobile and React for web dashboard.</p>
                     <div class="project-links">
                         <a href="#" class="project-link">
                             <i class="fab fa-github"></i> View Code
@@ -334,9 +336,9 @@
                 </div>
                 
                 <div class="project-item">
-                    <h4>CipherGPT – AI Chatbot <span class="badge">SaaS</span></h4>
+                    <h4 style="color: #ffffff;">CipherGPT – AI Chatbot <span class="badge">SaaS</span></h4>
                     <p class="timeline-date">July 2024</p>
-                    <p>A full-stack SaaS chatbot leveraging OpenAI API with user authentication, conversation history, and subscription management. Features include multiple AI models, file uploads, and team collaboration.</p>
+                    <p style="color: #d0d0e0;">A full-stack SaaS chatbot leveraging OpenAI API with user authentication, conversation history, and subscription management. Features include multiple AI models, file uploads, and team collaboration.</p>
                     <div class="project-links">
                         <a href="#" class="project-link">
                             <i class="fab fa-github"></i> View Code
@@ -345,8 +347,8 @@
                 </div>
                 
                 <div class="project-item">
-                    <h4>Job Portal Platform <span class="badge">Full Stack</span></h4>
-                    <p>A comprehensive job search and application platform with advanced filtering, resume parsing, and application tracking. Includes employer dashboard, candidate matching algorithm, and interview scheduling.</p>
+                    <h4 style="color: #ffffff;">Job Portal Platform <span class="badge">Full Stack</span></h4>
+                    <p style="color: #d0d0e0;">A comprehensive job search and application platform with advanced filtering, resume parsing, and application tracking. Includes employer dashboard, candidate matching algorithm, and interview scheduling.</p>
                     <div class="project-links">
                         <a href="#" class="project-link">
                             <i class="fab fa-github"></i> View Code
@@ -355,8 +357,8 @@
                 </div>
                 
                 <div class="project-item">
-                    <h4>E-learning Platform <span class="badge">Full Stack</span></h4>
-                    <p>An interactive platform for online courses with video streaming, progress tracking, and assessment features. Includes instructor dashboard, certificate generation, and discussion forums.</p>
+                    <h4 style="color: #ffffff;">E-learning Platform <span class="badge">Full Stack</span></h4>
+                    <p style="color: #d0d0e0;">An interactive platform for online courses with video streaming, progress tracking, and assessment features. Includes instructor dashboard, certificate generation, and discussion forums.</p>
                     <div class="project-links">
                         <a href="#" class="project-link">
                             <i class="fab fa-github"></i> View Code
@@ -365,8 +367,8 @@
                 </div>
                 
                 <div class="project-item">
-                    <h4>Vulnerability Scanner Tool <span class="badge">Cybersecurity</span></h4>
-                    <p>A custom vulnerability scanner for web applications that identifies common security flaws like XSS, SQL injection, and CSRF vulnerabilities. Features detailed reporting and remediation guidance.</p>
+                    <h4 style="color: #ffffff;">Vulnerability Scanner Tool <span class="badge">Cybersecurity</span></h4>
+                    <p style="color: #d0d0e0;">A custom vulnerability scanner for web applications that identifies common security flaws like XSS, SQL injection, and CSRF vulnerabilities. Features detailed reporting and remediation guidance.</p>
                     <div class="project-links">
                         <a href="#" class="project-link">
                             <i class="fab fa-github"></i> View Code
@@ -383,43 +385,43 @@
             </div>
             <div class="hologram-content">
                 <h3 class="section-heading">Let's Create Something Amazing Together</h3>
-                <p style="margin-bottom: 30px;">I'm always open to discussing new opportunities, interesting projects, or potential collaborations. Feel free to reach out through any of the channels below.</p>
+                <p style="margin-bottom: 35px; color: #d0d0e0;">I'm always open to discussing new opportunities, interesting projects, or potential collaborations. Feel free to reach out through any of the channels below.</p>
                 
                 <div class="contact-info">
                     <div class="contact-item">
                         <div class="contact-icon">
                             <i class="fas fa-globe"></i>
                         </div>
-                        <h4>Website</h4>
-                        <p>lakshay.dev</p>
+                        <h4 style="color: #ffffff;">Website</h4>
+                        <p style="color: #b0d0ff;">lakshay.dev</p>
                     </div>
                     
                     <div class="contact-item">
                         <div class="contact-icon">
                             <i class="fas fa-envelope"></i>
                         </div>
-                        <h4>Email</h4>
-                        <p>lakshay@example.com</p>
+                        <h4 style="color: #ffffff;">Email</h4>
+                        <p style="color: #b0d0ff;">lakshay@example.com</p>
                     </div>
                     
                     <div class="contact-item">
                         <div class="contact-icon">
                             <i class="fab fa-linkedin"></i>
                         </div>
-                        <h4>LinkedIn</h4>
-                        <p>linkedin.com/in/lakshay</p>
+                        <h4 style="color: #ffffff;">LinkedIn</h4>
+                        <p style="color: #b0d0ff;">linkedin.com/in/lakshay</p>
                     </div>
                     
                     <div class="contact-item">
                         <div class="contact-icon">
                             <i class="fab fa-github"></i>
                         </div>
-                        <h4>GitHub</h4>
-                        <p>github.com/lakshay</p>
+                        <h4 style="color: #ffffff;">GitHub</h4>
+                        <p style="color: #b0d0ff;">github.com/lakshay</p>
                     </div>
                 </div>
                 
-                <h3 class="section-heading" style="margin-top: 30px;">Professional Services</h3>
+                <h3 class="section-heading" style="margin-top: 35px;">Professional Services</h3>
                 <div class="skill-list">
                     <span class="skill-tag">Web Application Development</span>
                     <span class="skill-tag">Cybersecurity Consulting</span>
@@ -432,11 +434,11 @@
         </div>
         
         <div class="game-over-screen" id="gameOverScreen">
-            <h2 class="game-over-title">Exploration Complete!</h2>
-            <p style="font-size: 24px; margin-bottom: 30px;">You've discovered 30 hidden nodes!</p>
-            <p style="font-size: 18px; margin-bottom: 40px; max-width: 600px;">Thank you for exploring my portfolio. I hope you enjoyed the journey and learned more about my skills and experience.</p>
-            <div id="finalTime" style="font-size: 20px; margin-bottom: 30px; color: #64b5f6;"></div>
-            <button class="start-button" id="restartButton">Explore Again</button>
+            <h2 class="game-over-title">Mission Accomplished!</h2>
+            <p style="font-size: 28px; margin-bottom: 35px; color: #d0d0e0;">You've successfully collected 30 energy nodes!</p>
+            <p style="font-size: 20px; margin-bottom: 45px; max-width: 700px; color: #b0d0ff;">Thank you for exploring my portfolio. I hope you enjoyed the journey and learned more about my skills and experience.</p>
+            <div id="finalTime" style="font-size: 24px; margin-bottom: 35px; color: #6cb2ff; font-weight: 700;"></div>
+            <button class="start-button" id="restartButton">Restart Mission</button>
         </div>
         
         <div id="loadingScreen">
@@ -448,6 +450,5 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="script.js"></script>
 </body>
 </html>
