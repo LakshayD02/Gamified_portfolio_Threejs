@@ -1,4 +1,4 @@
- * {
+* {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -52,7 +52,6 @@
             backdrop-filter: blur(12px);
             min-width: 200px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-            z-index: 10;
         }
         
         .hud-section {
@@ -105,7 +104,6 @@
             border: 1px solid rgba(80, 140, 255, 0.25);
             max-width: 90%;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-            z-index: 10;
         }
         
         #loadingScreen {
@@ -159,13 +157,12 @@
             background: linear-gradient(135deg, #0a0f1d, #1a1f3d);
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
+            justify-content: center;
             align-items: center;
             z-index: 50;
             text-align: center;
-            padding: 40px 20px;
+            padding: 20px;
             overflow-y: auto;
-            overflow-x: hidden;
         }
         
         .start-title {
@@ -175,7 +172,6 @@
             text-shadow: 0 0 20px rgba(108, 178, 255, 0.8);
             font-weight: 800;
             letter-spacing: 2px;
-            margin-top: 20px;
         }
         
         .start-subtitle {
@@ -184,7 +180,6 @@
             margin-bottom: 40px;
             max-width: 700px;
             line-height: 1.6;
-            padding: 0 20px;
         }
         
         .rules-container {
@@ -198,7 +193,6 @@
             max-height: 60vh;
             overflow-y: auto;
             box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-            width: 90%;
         }
         
         .rules-title {
@@ -239,7 +233,6 @@
             letter-spacing: 1.5px;
             box-shadow: 0 8px 20px rgba(58, 134, 255, 0.5);
             text-transform: uppercase;
-            margin-bottom: 40px;
         }
         
         .start-button:hover {
@@ -672,7 +665,7 @@
             font-weight: 600;
         }
 
-        /* Enhanced Mini-map */
+        /* Enhanced Mini-map - Hidden on smaller screens */
         .mini-map {
             position: absolute;
             bottom: 20px;
@@ -702,7 +695,7 @@
             display: none;
             flex-direction: column;
             gap: 15px;
-            z-index: 15;
+            z-index: 5;
             pointer-events: auto;
         }
 
@@ -747,7 +740,6 @@
             backdrop-filter: blur(12px);
             font-size: 16px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-            z-index: 10;
         }
         
         /* Power-ups */
@@ -768,41 +760,20 @@
             100% { transform: translateY(0); }
         }
 
-        /* ========== RESPONSIVE DESIGN ========== */
-
-        /* Large screens (1200px and above) */
-        @media (min-width: 1200px) {
+        /* Responsive adjustments */
+        @media (max-width: 1024px) {
             .mini-map {
-                display: block;
+                display: none;
             }
         }
-
-        /* Medium screens (992px to 1199px) */
-        @media (max-width: 1199px) {
-            .mini-map {
-                display: block;
-            }
-        }
-
-        /* Tablets and small screens (768px to 991px) */
-        @media (max-width: 991px) {
+        
+        @media (max-width: 768px) {
             .start-title {
-                font-size: 48px;
-                margin-bottom: 20px;
+                font-size: 42px;
             }
             
             .start-subtitle {
                 font-size: 20px;
-                margin-bottom: 30px;
-            }
-            
-            .rules-container {
-                padding: 25px;
-                max-height: 55vh;
-            }
-            
-            .rules-title {
-                font-size: 26px;
             }
             
             .hologram-title {
@@ -812,11 +783,10 @@
             .profile-header {
                 flex-direction: column;
                 text-align: center;
-                gap: 20px;
             }
             
             .contact-info {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                grid-template-columns: 1fr;
             }
             
             .project-links {
@@ -825,17 +795,12 @@
             }
             
             .radar {
-                width: 160px;
-                height: 160px;
-            }
-            
-            .mini-map {
-                width: 180px;
-                height: 180px;
+                width: 150px;
+                height: 150px;
             }
             
             #hud, #instructions {
-                padding: 15px;
+                padding: 12px;
             }
             
             #mobileControls {
@@ -843,8 +808,9 @@
             }
             
             #instructions {
-                bottom: 240px;
+                bottom: 220px;
                 right: 20px;
+                display: none;
             }
             
             .hud-title {
@@ -852,65 +818,40 @@
             }
             
             .hud-value {
-                font-size: 16px;
+                font-size: 14px;
             }
             
             #hud {
-                min-width: 170px;
+                min-width: 160px;
             }
             
             .time-display {
-                font-size: 15px;
+                font-size: 14px;
                 padding: 10px 14px;
             }
             
             .mobile-control-btn {
-                width: 65px;
-                height: 65px;
-                font-size: 26px;
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+            }
+            
+            .mini-map {
+                display: none;
             }
         }
 
-        /* Small tablets and large phones (576px to 767px) */
-        @media (max-width: 767px) {
+        @media (max-width: 480px) {
             .start-title {
-                font-size: 42px;
-                margin-bottom: 15px;
+                font-size: 32px;
             }
             
             .start-subtitle {
                 font-size: 18px;
-                margin-bottom: 25px;
-            }
-            
-            .rules-container {
-                padding: 20px;
-                max-height: 50vh;
-                margin-bottom: 20px;
-            }
-            
-            .rules-title {
-                font-size: 24px;
-                margin-bottom: 15px;
-            }
-            
-            .rules-list {
-                font-size: 15px;
-            }
-            
-            .start-button {
-                padding: 16px 40px;
-                font-size: 18px;
-                margin-top: 15px;
-                margin-bottom: 30px;
             }
             
             .hologram-title {
-                font-size: 26px;
-            }
-            
-            .hologram-content {
-                padding: 0 5px;
+                font-size: 24px;
             }
             
             .profile-avatar {
@@ -923,32 +864,15 @@
                 font-size: 28px;
             }
             
-            .profile-info p {
-                font-size: 16px;
-            }
-            
-            .contact-info {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            
             .radar {
-                width: 140px;
-                height: 140px;
-                bottom: 15px;
-                left: 15px;
-            }
-            
-            .mini-map {
-                width: 160px;
-                height: 160px;
-                bottom: 15px;
-                right: 15px;
+                width: 130px;
+                height: 130px;
+                bottom: 10px;
+                left: 10px;
             }
             
             #hud, #instructions {
                 font-size: 14px;
-                padding: 12px;
             }
             
             .skill-tag {
@@ -957,323 +881,51 @@
             }
             
             .mobile-control-btn {
-                width: 60px;
-                height: 60px;
-                font-size: 24px;
-            }
-            
-            #hud {
-                top: 15px;
-                left: 15px;
-                padding: 12px;
-                min-width: 160px;
-            }
-            
-            .time-display {
-                top: 15px;
-                right: 15px;
-                font-size: 14px;
-                padding: 10px 12px;
-            }
-            
-            #instructions {
-                bottom: 260px;
-                right: 15px;
-                padding: 15px;
-            }
-            
-            .notification {
-                max-width: 300px;
-                padding: 15px 20px;
-            }
-        }
-
-        /* Mobile phones (575px and below) */
-        @media (max-width: 575px) {
-            .start-title {
-                font-size: 36px;
-                margin-bottom: 10px;
-                margin-top: 10px;
-            }
-            
-            .start-subtitle {
-                font-size: 16px;
-                margin-bottom: 20px;
-                padding: 0 15px;
-            }
-            
-            .rules-container {
-                padding: 15px;
-                max-height: 45vh;
-                margin-bottom: 15px;
-                width: 95%;
-            }
-            
-            .rules-title {
-                font-size: 22px;
-                margin-bottom: 12px;
-            }
-            
-            .rules-list {
-                font-size: 14px;
-            }
-            
-            .rules-list li {
-                margin-bottom: 10px;
-            }
-            
-            .start-button {
-                padding: 14px 35px;
-                font-size: 16px;
-                margin-top: 10px;
-                margin-bottom: 20px;
-            }
-            
-            .portfolio-hologram {
-                padding: 25px;
-                max-height: 80vh;
-            }
-            
-            .hologram-title {
-                font-size: 24px;
-            }
-            
-            .hologram-header {
-                margin-bottom: 20px;
-                padding-bottom: 15px;
-            }
-            
-            .close-btn {
-                width: 35px;
-                height: 35px;
-                font-size: 24px;
-            }
-            
-            .profile-avatar {
-                width: 80px;
-                height: 80px;
-                font-size: 35px;
-            }
-            
-            .profile-info h2 {
-                font-size: 24px;
-            }
-            
-            .profile-info p {
-                font-size: 15px;
-            }
-            
-            .section-heading {
-                font-size: 20px;
-                margin-bottom: 15px;
-            }
-            
-            .experience-item, .project-item {
-                padding: 20px;
-                margin-bottom: 20px;
-            }
-            
-            .radar {
-                width: 120px;
-                height: 120px;
-                bottom: 10px;
-                left: 10px;
-            }
-            
-            .mini-map {
-                display: none; /* Hide mini-map on very small screens */
-            }
-            
-            #hud {
-                top: 10px;
-                left: 10px;
-                padding: 10px;
-                min-width: 150px;
-            }
-            
-            .hud-title {
-                font-size: 10px;
-            }
-            
-            .hud-value {
-                font-size: 14px;
-            }
-            
-            .progress-bar {
-                height: 6px;
-            }
-            
-            .time-display {
-                top: 10px;
-                right: 10px;
-                font-size: 13px;
-                padding: 8px 10px;
-            }
-            
-            #instructions {
-                bottom: 200px;
-                right: 10px;
-                padding: 12px;
-                font-size: 13px;
-                max-width: 85%;
-            }
-            
-            .mobile-control-btn {
                 width: 55px;
                 height: 55px;
                 font-size: 22px;
             }
             
-            #mobileControls {
-                bottom: 10px;
-                right: 10px;
-                gap: 10px;
-            }
-            
-            .mobile-control-row {
-                gap: 10px;
-            }
-            
-            .notification {
-                max-width: 280px;
-                padding: 12px 18px;
-                top: 10px;
-                right: 10px;
-            }
-            
-            .notification-title {
-                font-size: 16px;
-            }
-            
-            .game-over-title {
-                font-size: 42px;
-                margin-bottom: 20px;
-            }
-        }
-
-        /* Very small phones (400px and below) */
-        @media (max-width: 400px) {
-            .start-title {
-                font-size: 32px;
-            }
-            
-            .start-subtitle {
-                font-size: 15px;
-            }
-            
-            .rules-container {
-                padding: 12px;
-                max-height: 40vh;
-            }
-            
-            .rules-title {
-                font-size: 20px;
-            }
-            
-            .rules-list {
-                font-size: 13px;
-            }
-            
-            .start-button {
-                padding: 12px 30px;
-                font-size: 15px;
-            }
-            
-            .portfolio-hologram {
-                padding: 20px;
-            }
-            
-            .hologram-title {
-                font-size: 22px;
-            }
-            
-            .profile-avatar {
-                width: 70px;
-                height: 70px;
-                font-size: 30px;
-            }
-            
-            .profile-info h2 {
-                font-size: 22px;
-            }
-            
-            .radar {
-                width: 100px;
-                height: 100px;
-            }
-            
             #hud {
-                min-width: 140px;
-            }
-            
-            .mobile-control-btn {
-                width: 50px;
-                height: 50px;
-                font-size: 20px;
-            }
-            
-            #instructions {
-                bottom: 180px;
-            }
-        }
-
-        /* Landscape orientation for mobile */
-        @media (max-height: 600px) and (orientation: landscape) {
-            .start-screen {
-                padding: 20px;
-            }
-            
-            .start-title {
-                font-size: 32px;
-                margin-bottom: 10px;
-                margin-top: 5px;
-            }
-            
-            .start-subtitle {
-                font-size: 16px;
-                margin-bottom: 15px;
+                top: 10px;
+                left: 10px;
+                padding: 10px;
             }
             
             .rules-container {
-                max-height: 40vh;
-                margin-bottom: 15px;
-                padding: 15px;
+                padding: 20px;
+                max-height: 50vh;
             }
             
             .rules-title {
-                font-size: 20px;
-                margin-bottom: 10px;
+                font-size: 24px;
             }
             
             .rules-list {
-                font-size: 14px;
-            }
-            
-            .start-button {
-                padding: 12px 30px;
-                font-size: 16px;
-                margin-top: 10px;
-                margin-bottom: 15px;
-            }
-            
-            .radar {
-                width: 120px;
-                height: 120px;
+                font-size: 15px;
             }
             
             .mini-map {
                 display: none;
             }
-            
-            #instructions {
-                bottom: 150px;
-                font-size: 12px;
-                padding: 10px;
+        }
+
+        @media (max-height: 700px) {
+            .rules-container {
+                max-height: 50vh;
             }
             
-            .mobile-control-btn {
-                width: 50px;
-                height: 50px;
-                font-size: 20px;
+            .start-title {
+                font-size: 36px;
+                margin-bottom: 15px;
+            }
+            
+            .start-subtitle {
+                font-size: 18px;
+                margin-bottom: 25px;
+            }
+            
+            .rules-container {
+                margin-bottom: 20px;
             }
         }
