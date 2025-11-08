@@ -1,4 +1,3 @@
-// Portfolio hologram functions
 function showHologram(hologramId) {
     document.getElementById(hologramId).classList.add('active');
 }
@@ -18,6 +17,68 @@ function showNotification(title, text) {
     }, 3000);
 }
 
+// Audio context for better performance (single instance)
+class AudioManager {
+    constructor() {
+        this.context = null;
+        this.initialized = false;
+        
+        try {
+            this.context = new (window.AudioContext || window.webkitAudioContext)();
+            this.initialized = true;
+        } catch (e) {
+            console.log("Web Audio API not supported");
+            this.initialized = false;
+        }
+    }
+    
+    playCollectSound() {
+        if (!this.initialized) return;
+        
+        try {
+            const oscillator = this.context.createOscillator();
+            const gainNode = this.context.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(this.context.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, this.context.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, this.context.currentTime + 0.3);
+            
+            oscillator.start(this.context.currentTime);
+            oscillator.stop(this.context.currentTime + 0.3);
+        } catch (e) {
+            console.log("Audio error:", e);
+        }
+    }
+    
+    playPowerUpSound() {
+        if (!this.initialized) return;
+        
+        try {
+            const oscillator = this.context.createOscillator();
+            const gainNode = this.context.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(this.context.destination);
+            
+            oscillator.frequency.value = 1200;
+            oscillator.type = 'sawtooth';
+            
+            gainNode.gain.setValueAtTime(0.4, this.context.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, this.context.currentTime + 0.5);
+            
+            oscillator.start(this.context.currentTime);
+            oscillator.stop(this.context.currentTime + 0.5);
+        } catch (e) {
+            console.log("Audio error:", e);
+        }
+    }
+}
+
 // Main Game Class
 class PortfolioExplorerGame {
     constructor() {
@@ -25,19 +86,22 @@ class PortfolioExplorerGame {
         this.camera = null;
         this.renderer = null;
         
-        // Car properties - Reduced speeds for better control
+        // Car properties
         this.car = null;
         this.carSpeed = 0;
-        this.carMaxSpeed = 0.12; // Reduced from 0.15
-        this.carAcceleration = 0.006; // Reduced from 0.008
-        this.carDeceleration = 0.015; // Reduced from 0.02
-        this.carRotationSpeed = 0.02;
+        this.carMaxSpeed = 0.15;
+        this.carAcceleration = 0.008;
+        this.carDeceleration = 0.02;
+        this.carRotationSpeed = 0.025;
         this.carRotation = 0;
         this.wheelRotation = 0;
         
         // Car flame effect
         this.flameEffect = null;
         this.isFlameOn = false;
+        
+        // Audio manager
+        this.audioManager = new AudioManager();
         
         // Engine sound
         this.engineSound = null;
@@ -52,7 +116,8 @@ class PortfolioExplorerGame {
             ArrowLeft: false,
             ArrowRight: false,
             Space: false,
-            KeyR: false
+            KeyR: false,
+            KeyH: false
         };
         
         // Mobile input state
@@ -67,15 +132,27 @@ class PortfolioExplorerGame {
         // Game objects
         this.objects = [];
         this.orbs = [];
+        this.animatingOrbs = []; // New: Track orbs that are animating
         this.terrain = null;
         this.obstacles = [];
+        this.powerUps = [];
+        this.animatingPowerUps = []; // New: Track power-ups that are animating
         this.collectedOrbs = 0;
-        this.totalOrbs = 35; // Increased to 35
-        this.requiredOrbs = 30; // Game ends at 30
+        this.totalOrbs = 35;
+        this.requiredOrbs = 30;
+        
+        // Power-up system
+        this.activePowerUp = null;
+        this.powerUpDuration = 0;
+        this.powerUpTypes = {
+            SPEED_BOOST: 'speed',
+            MAGNET: 'magnet',
+            DOUBLE_POINTS: 'double'
+        };
         
         // Collision cooldown
         this.collisionCooldown = false;
-        this.collisionCooldownTime = 1000; // 1 second
+        this.collisionCooldownTime = 1000;
         
         // Timer
         this.startTime = null;
@@ -120,8 +197,9 @@ class PortfolioExplorerGame {
         this.carVelocity = new THREE.Vector3();
         this.carTargetPosition = new THREE.Vector3();
         
-        // Skybox
-        this.skybox = null;
+        // Mini-map
+        this.miniMapCanvas = null;
+        this.miniMapContext = null;
         
         this.init();
     }
@@ -131,8 +209,8 @@ class PortfolioExplorerGame {
         
         // Set up the scene
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x0a0f2d);
-        this.scene.fog = new THREE.Fog(0x0a0f2d, 50, 300);
+        this.scene.background = new THREE.Color(0x0a0f1d);
+        this.scene.fog = new THREE.Fog(0x0a0f1d, 50, 300);
         
         // Set up the camera (third-person following car)
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -166,6 +244,9 @@ class PortfolioExplorerGame {
         // Create obstacles
         this.createObstacles();
         
+        // Create power-ups
+        this.createPowerUps();
+        
         // Set up controls
         this.setupControls();
         
@@ -174,6 +255,9 @@ class PortfolioExplorerGame {
         
         // Initialize radar
         this.initRadar();
+        
+        // Initialize mini-map
+        this.initMiniMap();
         
         // Initialize engine sound
         this.initEngineSound();
@@ -196,8 +280,8 @@ class PortfolioExplorerGame {
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
         directionalLight.position.set(50, 50, 25);
         directionalLight.castShadow = true;
-        directionalLight.shadow.mapSize.width = 1024;
-        directionalLight.shadow.mapSize.height = 1024;
+        directionalLight.shadow.mapSize.width = 1024; // Reduced from 2048 for performance
+        directionalLight.shadow.mapSize.height = 1024; // Reduced from 2048 for performance
         directionalLight.shadow.camera.near = 0.5;
         directionalLight.shadow.camera.far = 500;
         directionalLight.shadow.camera.left = -100;
@@ -207,16 +291,16 @@ class PortfolioExplorerGame {
         this.scene.add(directionalLight);
         
         // Add some point lights
-        const pointLight = new THREE.PointLight(0x64b5f6, 0.5, 100);
+        const pointLight = new THREE.PointLight(0x6cb2ff, 0.5, 100);
         pointLight.position.set(0, 20, 0);
         this.scene.add(pointLight);
     }
     
     createEnvironment() {
         // Create a large terrain with varied elevation
-        const terrainGeometry = new THREE.PlaneGeometry(400, 400, 100, 100);
+        const terrainGeometry = new THREE.PlaneGeometry(400, 400, 50, 50); // Reduced segments for performance
         const terrainMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0x1a237e,
+            color: 0x1a1f3d,
             roughness: 0.8,
             metalness: 0.2
         });
@@ -225,7 +309,7 @@ class PortfolioExplorerGame {
         this.terrain.rotation.x = -Math.PI / 2;
         this.terrain.receiveShadow = true;
         
-        // Create varied terrain with hills and valleys - Smoother terrain
+        // Create varied terrain with hills and valleys
         const vertices = terrainGeometry.attributes.position.array;
         for (let i = 0; i < vertices.length; i += 3) {
             const x = vertices[i];
@@ -252,43 +336,6 @@ class PortfolioExplorerGame {
         terrainGeometry.computeVertexNormals();
         
         this.scene.add(this.terrain);
-        
-        // Add a skybox
-        this.createSkybox();
-    }
-    
-    createSkybox() {
-        // Simple sky background with stars
-        const skyGeometry = new THREE.SphereGeometry(500, 32, 32);
-        const skyMaterial = new THREE.MeshBasicMaterial({
-            color: 0x0a0f2d,
-            side: THREE.BackSide
-        });
-        this.skybox = new THREE.Mesh(skyGeometry, skyMaterial);
-        this.scene.add(this.skybox);
-        
-        // Add stars
-        const starGeometry = new THREE.BufferGeometry();
-        const starPositions = [];
-        
-        for (let i = 0; i < 15000; i++) {
-            const x = (Math.random() - 0.5) * 2000;
-            const y = (Math.random() - 0.5) * 2000;
-            const z = (Math.random() - 0.5) * 2000;
-            
-            starPositions.push(x, y, z);
-        }
-        
-        starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
-        
-        const starMaterial = new THREE.PointsMaterial({
-            color: 0xFFFFFF,
-            size: 1.5,
-            sizeAttenuation: true
-        });
-        
-        const stars = new THREE.Points(starGeometry, starMaterial);
-        this.scene.add(stars);
     }
     
     createCar() {
@@ -300,7 +347,7 @@ class PortfolioExplorerGame {
         // Main car body - more realistic design, scaled down
         const bodyGeometry = new THREE.BoxGeometry(3.5 * scaleFactor, 1.2 * scaleFactor, 6.5 * scaleFactor);
         const bodyMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0x1a237e,
+            color: 0x1a1f3d,
             metalness: 0.8,
             roughness: 0.2
         });
@@ -312,7 +359,7 @@ class PortfolioExplorerGame {
         // Car top/cabin
         const topGeometry = new THREE.BoxGeometry(2.8 * scaleFactor, 1.2 * scaleFactor, 3.5 * scaleFactor);
         const topMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0x0d47a1,
+            color: 0x0d1f5e,
             metalness: 0.7,
             roughness: 0.3
         });
@@ -333,9 +380,9 @@ class PortfolioExplorerGame {
         carGroup.add(windowMesh);
         
         // Wheels - more realistic with white color
-        const wheelGeometry = new THREE.CylinderGeometry(0.6 * scaleFactor, 0.6 * scaleFactor, 0.4 * scaleFactor, 16);
+        const wheelGeometry = new THREE.CylinderGeometry(0.6 * scaleFactor, 0.6 * scaleFactor, 0.4 * scaleFactor, 8); // Reduced segments for performance
         const wheelMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0xF5F5F5, // White color for wheels
+            color: 0xF5F5F5,
             metalness: 0.3,
             roughness: 0.7
         });
@@ -402,7 +449,7 @@ class PortfolioExplorerGame {
         
         // Spoiler
         const spoilerGeometry = new THREE.BoxGeometry(3 * scaleFactor, 0.3 * scaleFactor, 0.5 * scaleFactor);
-        const spoilerMaterial = new THREE.MeshStandardMaterial({ color: 0x1a237e });
+        const spoilerMaterial = new THREE.MeshStandardMaterial({ color: 0x1a1f3d });
         const spoiler = new THREE.Mesh(spoilerGeometry, spoilerMaterial);
         spoiler.position.set(0, 2.5 * scaleFactor, -3.2 * scaleFactor);
         spoiler.castShadow = true;
@@ -535,10 +582,10 @@ class PortfolioExplorerGame {
             const terrainHeight = this.getTerrainHeight(x, z);
             const y = terrainHeight + 2;
             
-            const orbGeometry = new THREE.SphereGeometry(1, 16, 16);
+            const orbGeometry = new THREE.SphereGeometry(1, 12, 12); // Reduced segments for performance
             const orbMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0x64b5f6,
-                emissive: 0x0d47a1,
+                color: 0x6cb2ff,
+                emissive: 0x0d1f5e,
                 emissiveIntensity: 0.3,
                 transparent: true,
                 opacity: 0.7
@@ -554,11 +601,60 @@ class PortfolioExplorerGame {
             };
             
             // Add a subtle point light to make the orb glow slightly
-            const orbLight = new THREE.PointLight(0x64b5f6, 0.3, 10);
+            const orbLight = new THREE.PointLight(0x6cb2ff, 0.3, 10);
             orb.add(orbLight);
             
             this.scene.add(orb);
             this.orbs.push(orb);
+        }
+    }
+    
+    createPowerUps() {
+        // Create power-ups scattered throughout the terrain
+        for (let i = 0; i < 5; i++) {
+            let x, z;
+            let validPosition = false;
+            
+            // Try to find a valid position
+            while (!validPosition) {
+                x = (Math.random() - 0.5) * this.explorationArea;
+                z = (Math.random() - 0.5) * this.explorationArea;
+                
+                // Check distance from center
+                const distanceFromCenter = Math.sqrt(x*x + z*z);
+                if (distanceFromCenter > 50 && distanceFromCenter < 150) {
+                    validPosition = true;
+                }
+            }
+            
+            // Get terrain height at this position
+            const terrainHeight = this.getTerrainHeight(x, z);
+            const y = terrainHeight + 1;
+            
+            const powerUpGeometry = new THREE.OctahedronGeometry(1.2, 0);
+            const powerUpMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0xff9800,
+                emissive: 0xff5722,
+                emissiveIntensity: 0.5,
+                transparent: true,
+                opacity: 0.8
+            });
+            
+            const powerUp = new THREE.Mesh(powerUpGeometry, powerUpMaterial);
+            powerUp.position.set(x, y, z);
+            powerUp.castShadow = true;
+            powerUp.userData = {
+                type: 'powerUp',
+                collected: false,
+                powerType: Object.values(this.powerUpTypes)[i % 3]
+            };
+            
+            // Add a point light
+            const powerUpLight = new THREE.PointLight(0xff9800, 0.5, 15);
+            powerUp.add(powerUpLight);
+            
+            this.scene.add(powerUp);
+            this.powerUps.push(powerUp);
         }
     }
     
@@ -583,7 +679,7 @@ class PortfolioExplorerGame {
     
     createObstacles() {
         // Create natural obstacles (trees, rocks) scattered throughout the terrain
-        for (let i = 0; i < 80; i++) {
+        for (let i = 0; i < 60; i++) { // Reduced from 80 for performance
             const x = (Math.random() - 0.5) * this.explorationArea;
             const z = (Math.random() - 0.5) * this.explorationArea;
             const terrainHeight = this.getTerrainHeight(x, z);
@@ -639,6 +735,12 @@ class PortfolioExplorerGame {
             if (this.keys.hasOwnProperty(event.code)) {
                 this.keys[event.code] = true;
                 event.preventDefault();
+            }
+            
+            // Toggle holograms with H key
+            if (event.code === 'KeyH' && !this.keys.KeyH) {
+                this.keys.KeyH = true;
+                this.toggleHolograms();
             }
         });
         
@@ -733,6 +835,14 @@ class PortfolioExplorerGame {
         });
     }
     
+    toggleHolograms() {
+        // Close all holograms
+        const holograms = document.querySelectorAll('.portfolio-hologram');
+        holograms.forEach(hologram => {
+            hologram.classList.remove('active');
+        });
+    }
+    
     startGame() {
         console.log("Starting game...");
         this.gameStarted = true;
@@ -783,12 +893,16 @@ class PortfolioExplorerGame {
         // Radar will be updated in the game loop
     }
     
+    initMiniMap() {
+        this.miniMapCanvas = document.getElementById('miniMapCanvas');
+        this.miniMapContext = this.miniMapCanvas.getContext('2d');
+        this.miniMapCanvas.width = 200;
+        this.miniMapCanvas.height = 200;
+    }
+    
     updateRadar() {
         const radarDots = document.getElementById('radarDots');
         radarDots.innerHTML = '';
-        
-        // Update radar range display
-        document.getElementById('radarRange').textContent = `${this.radarRange}m`;
         
         // Check for orbs within radar range
         this.orbs.forEach(orb => {
@@ -802,10 +916,10 @@ class PortfolioExplorerGame {
                         orb.position.x - this.car.position.x
                     ) - this.car.rotation.y;
                     
-                    const radarDistance = (distance / this.radarRange) * 75; // 75 is radar radius
+                    const radarDistance = (distance / this.radarRange) * 90; // 90 is radar radius
                     
-                    const radarX = 75 + Math.cos(angle) * radarDistance;
-                    const radarY = 75 + Math.sin(angle) * radarDistance;
+                    const radarX = 90 + Math.cos(angle) * radarDistance;
+                    const radarY = 90 + Math.sin(angle) * radarDistance;
                     
                     // Create radar dot
                     const radarDot = document.createElement('div');
@@ -826,6 +940,75 @@ class PortfolioExplorerGame {
                 }
             }
         });
+    }
+    
+    updateMiniMap() {
+        // Only update mini-map if it's visible
+        const miniMap = document.querySelector('.mini-map');
+        if (miniMap && window.getComputedStyle(miniMap).display !== 'none') {
+            const ctx = this.miniMapContext;
+            const width = this.miniMapCanvas.width;
+            const height = this.miniMapCanvas.height;
+            
+            // Clear the mini-map
+            ctx.fillStyle = 'rgba(15, 20, 35, 0.85)';
+            ctx.fillRect(0, 0, width, height);
+            
+            // Draw border
+            ctx.strokeStyle = '#6cb2ff';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(0, 0, width, height);
+            
+            // Calculate scale for mini-map
+            const scale = width / 400;
+            
+            // Draw car position
+            const carX = (this.car.position.x + 200) * scale;
+            const carY = (this.car.position.z + 200) * scale;
+            
+            ctx.fillStyle = '#6cb2ff';
+            ctx.beginPath();
+            ctx.arc(carX, carY, 4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw car direction
+            const directionLength = 10;
+            const directionX = carX + Math.sin(-this.car.rotation.y) * directionLength;
+            const directionY = carY + Math.cos(-this.car.rotation.y) * directionLength;
+            
+            ctx.strokeStyle = '#6cb2ff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(carX, carY);
+            ctx.lineTo(directionX, directionY);
+            ctx.stroke();
+            
+            // Draw orbs
+            this.orbs.forEach(orb => {
+                if (!orb.userData.collected) {
+                    const orbX = (orb.position.x + 200) * scale;
+                    const orbY = (orb.position.z + 200) * scale;
+                    
+                    ctx.fillStyle = '#6cb2ff';
+                    ctx.beginPath();
+                    ctx.arc(orbX, orbY, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+            
+            // Draw power-ups
+            this.powerUps.forEach(powerUp => {
+                if (!powerUp.userData.collected) {
+                    const powerX = (powerUp.position.x + 200) * scale;
+                    const powerY = (powerUp.position.z + 200) * scale;
+                    
+                    ctx.fillStyle = '#ff9800';
+                    ctx.beginPath();
+                    ctx.arc(powerX, powerY, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+        }
     }
     
     checkCollisions() {
@@ -876,6 +1059,9 @@ class PortfolioExplorerGame {
             this.carRotation = 0;
             this.carSpeed = 0;
         }
+        
+        // Apply power-up effects
+        this.applyPowerUpEffects();
         
         // Handle acceleration and braking
         if (this.keys.ArrowUp || this.mobileInput.up) {
@@ -948,14 +1134,68 @@ class PortfolioExplorerGame {
         document.getElementById('speedDisplay').textContent = `${speedKmh} km/h`;
     }
     
+    applyPowerUpEffects() {
+        // Apply active power-up effects
+        if (this.activePowerUp) {
+            this.powerUpDuration -= 16; // Assuming 60fps
+            
+            if (this.powerUpDuration <= 0) {
+                // Power-up expired
+                this.deactivatePowerUp();
+            } else {
+                // Apply effects based on power-up type
+                switch (this.activePowerUp) {
+                    case this.powerUpTypes.SPEED_BOOST:
+                        this.carMaxSpeed = 0.25; // Increased speed
+                        break;
+                    case this.powerUpTypes.MAGNET:
+                        // Attract nearby orbs
+                        this.attractNearbyOrbs();
+                        break;
+                    case this.powerUpTypes.DOUBLE_POINTS:
+                        // Double points are handled when collecting orbs
+                        break;
+                }
+            }
+        } else {
+            // Reset to normal values when no power-up is active
+            this.carMaxSpeed = 0.15;
+        }
+    }
+    
+    attractNearbyOrbs() {
+        // Attract nearby orbs towards the car
+        this.orbs.forEach(orb => {
+            if (!orb.userData.collected) {
+                const distance = this.car.position.distanceTo(orb.position);
+                if (distance < 20) {
+                    // Move orb towards car
+                    const direction = new THREE.Vector3()
+                        .subVectors(this.car.position, orb.position)
+                        .normalize()
+                        .multiplyScalar(0.1);
+                    
+                    orb.position.add(direction);
+                }
+            }
+        });
+    }
+    
+    deactivatePowerUp() {
+        this.activePowerUp = null;
+        this.powerUpDuration = 0;
+        document.getElementById('powerUpStatus').textContent = 'None Active';
+        showNotification('Power-up Expired', 'Your power-up has worn off');
+    }
+    
     updateCamera(delta) {
         // Third-person camera following the car with smoothing
         const cameraDistance = 15;
         const cameraHeight = 8;
         
         // Calculate target camera position
-        const targetX = this.car.position.x + Math.sin(this.carRotation) * cameraDistance;
-        const targetZ = this.car.position.z + Math.cos(this.carRotation) * cameraDistance;
+        const targetX = this.car.position.x + Math.sin(this.car.rotation.y) * cameraDistance;
+        const targetZ = this.car.position.z + Math.cos(this.car.rotation.y) * cameraDistance;
         const targetY = this.car.position.y + cameraHeight;
         
         // Smooth camera movement using lerp with delta time for consistent smoothing
@@ -971,53 +1211,93 @@ class PortfolioExplorerGame {
             this.car.position.y + 2,
             this.car.position.z
         );
+    }
+    
+    // NEW: Optimized orb collection with batched animation
+    updateAnimations(delta) {
+        // Update orb animations
+        for (let i = this.animatingOrbs.length - 1; i >= 0; i--) {
+            const orb = this.animatingOrbs[i];
+            orb.scale.multiplyScalar(0.85); // Scale down
+            
+            if (orb.scale.x < 0.1) {
+                this.scene.remove(orb);
+                this.animatingOrbs.splice(i, 1);
+            }
+        }
         
-        // Update skybox position to stay with camera (fixes shaking)
-        if (this.skybox) {
-            this.skybox.position.copy(this.camera.position);
+        // Update power-up animations
+        for (let i = this.animatingPowerUps.length - 1; i >= 0; i--) {
+            const powerUp = this.animatingPowerUps[i];
+            powerUp.scale.multiplyScalar(0.85); // Scale down
+            
+            if (powerUp.scale.x < 0.1) {
+                this.scene.remove(powerUp);
+                this.animatingPowerUps.splice(i, 1);
+            }
         }
     }
     
     checkOrbCollisions() {
-        this.orbs.forEach(orb => {
+        for (let i = 0; i < this.orbs.length; i++) {
+            const orb = this.orbs[i];
             if (!orb.userData.collected) {
                 const distance = this.car.position.distanceTo(orb.position);
                 if (distance < 3) {
-                    this.collectOrb(orb);
+                    this.collectOrb(orb, i);
+                    break; // Only collect one orb per frame to prevent multiple collisions
                 }
             }
-        });
+        }
     }
     
-    collectOrb(orb) {
+    checkPowerUpCollisions() {
+        for (let i = 0; i < this.powerUps.length; i++) {
+            const powerUp = this.powerUps[i];
+            if (!powerUp.userData.collected) {
+                const distance = this.car.position.distanceTo(powerUp.position);
+                if (distance < 3) {
+                    this.collectPowerUp(powerUp, i);
+                    break; // Only collect one power-up per frame
+                }
+            }
+        }
+    }
+    
+    // OPTIMIZED: Orb collection without recursive animation
+    collectOrb(orb, index) {
         orb.userData.collected = true;
         
-        // Make orb disappear with animation
-        const scaleDown = () => {
-            if (orb.scale.x > 0.1) {
-                orb.scale.x *= 0.8;
-                orb.scale.y *= 0.8;
-                orb.scale.z *= 0.8;
-                requestAnimationFrame(scaleDown);
-            } else {
-                this.scene.remove(orb);
-            }
-        };
-        scaleDown();
+        // Remove from main array
+        this.orbs.splice(index, 1);
+        
+        // Add to animation list
+        this.animatingOrbs.push(orb);
         
         // Update collected count
-        this.collectedOrbs++;
+        let points = 1;
+        if (this.activePowerUp === this.powerUpTypes.DOUBLE_POINTS) {
+            points = 2;
+        }
+        
+        this.collectedOrbs += points;
         document.getElementById('orbsCount').textContent = `${this.collectedOrbs}/${this.requiredOrbs}`;
         
         // Update progress
         const progress = (this.collectedOrbs / this.requiredOrbs) * 100;
         document.getElementById('progressFill').style.width = `${progress}%`;
         
-        // Play sound effect
-        this.playCollectSound();
+        // Play sound effect (optimized)
+        this.audioManager.playCollectSound();
         
         // Show notification
-        showNotification('Node Discovered!', `You found a hidden energy node (${this.collectedOrbs}/${this.requiredOrbs})`);
+        let message = `You found a hidden energy node`;
+        if (points > 1) {
+            message += ` (Double points active!)`;
+        }
+        message += ` (${this.collectedOrbs}/${this.requiredOrbs})`;
+        
+        showNotification('Node Discovered!', message);
         
         // Check if any portfolio sections can be unlocked
         this.checkPortfolioUnlocks();
@@ -1026,6 +1306,43 @@ class PortfolioExplorerGame {
         if (this.collectedOrbs >= this.requiredOrbs) {
             this.gameComplete();
         }
+    }
+    
+    // OPTIMIZED: Power-up collection without recursive animation
+    collectPowerUp(powerUp, index) {
+        powerUp.userData.collected = true;
+        
+        // Remove from main array
+        this.powerUps.splice(index, 1);
+        
+        // Add to animation list
+        this.animatingPowerUps.push(powerUp);
+        
+        // Activate the power-up
+        this.activePowerUp = powerUp.userData.powerType;
+        this.powerUpDuration = 10000; // 10 seconds
+        
+        // Update power-up status display
+        let powerUpName = '';
+        switch (this.activePowerUp) {
+            case this.powerUpTypes.SPEED_BOOST:
+                powerUpName = 'Speed Boost';
+                break;
+            case this.powerUpTypes.MAGNET:
+                powerUpName = 'Orb Magnet';
+                break;
+            case this.powerUpTypes.DOUBLE_POINTS:
+                powerUpName = 'Double Points';
+                break;
+        }
+        
+        document.getElementById('powerUpStatus').textContent = `${powerUpName} (${Math.ceil(this.powerUpDuration/1000)}s)`;
+        
+        // Show notification
+        showNotification('Power-up Collected!', `You activated ${powerUpName}`);
+        
+        // Play sound effect (optimized)
+        this.audioManager.playPowerUpSound();
     }
     
     checkPortfolioUnlocks() {
@@ -1080,29 +1397,6 @@ class PortfolioExplorerGame {
         }
     }
     
-    playCollectSound() {
-        // Simple beep sound using Web Audio API
-        try {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.frequency.value = 800;
-            oscillator.type = 'sine';
-            
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-            
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.3);
-        } catch (e) {
-            console.log("Audio not supported");
-        }
-    }
-    
     gameComplete() {
         this.gameOver = true;
         if (this.timerInterval) {
@@ -1113,7 +1407,7 @@ class PortfolioExplorerGame {
         const minutes = Math.floor(this.gameTime / 60);
         const seconds = this.gameTime % 60;
         document.getElementById('finalTime').textContent = 
-            `Completion Time: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            `Mission Time: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         
         document.getElementById('gameOverScreen').classList.add('active');
     }
@@ -1132,8 +1426,23 @@ class PortfolioExplorerGame {
             // Check for orb collisions
             this.checkOrbCollisions();
             
+            // Check for power-up collisions
+            this.checkPowerUpCollisions();
+            
+            // Update animations (NEW)
+            this.updateAnimations(delta);
+            
             // Update radar
             this.updateRadar();
+            
+            // Update mini-map
+            this.updateMiniMap();
+            
+            // Update power-up timer display
+            if (this.activePowerUp) {
+                document.getElementById('powerUpStatus').textContent = 
+                    `${this.activePowerUp} (${Math.ceil(this.powerUpDuration/1000)}s)`;
+            }
         }
         
         this.renderer.render(this.scene, this.camera);
